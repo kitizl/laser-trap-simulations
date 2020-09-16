@@ -35,4 +35,4 @@ The documentation for these code is _okay_, but not great, and will be improved 
 
 Additionally, the residence time distribution code is possibly not the most efficient way to do what needs to be done, and if I ever find a better way of finding the distribution, I will update it then.
 
-There are some folders that contain data that were simulated, along with plots and some statistics.
+There is one folder that is added that shows the power spectrum of the signal indicating the precense of the SR that is included for visual aid.
