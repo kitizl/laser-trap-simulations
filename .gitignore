@@ -1,0 +1,7 @@
+# ignore all PDFs
+
+*.pdf
+
+# and if that was not clear, then the folder
+
+single-well/papers
