@@ -29,7 +29,7 @@ if __name__ == "__main__":
 
 	# running statistics, particularly the histogram
 	import statistics
-	statistics.signal_ensemble("data") # providing DIR for accessing data
+	statistics.signal_ensemble("data",20,"plots") # providing DIR for accessing data
 
 	# once this is done, you should have a folder of plot data and a movie
 
