@@ -23,7 +23,13 @@ if __name__ == "__main__":
 		print(f"Running {trial_num}/100...")
 		ts,xs,vs,es = simulation.trapSolver([simulation.var_stiffness,max_time, gamma, kBT], saving_freq)
 		# save this data
-		simulation.save_data([ts,xs,vs,es],trial_num)
+		simulation.save_data([ts,xs,vs,es],DIR_NAME="data",file_index=trial_num)
 	
 	print("Simulations are complete")
+
+	# running statistics, particularly the histogram
+	import statistics
+	statistics.signal_ensemble("data") # providing DIR for accessing data
+
+	# once this is done, you should have a folder of plot data and a movie
 

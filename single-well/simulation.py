@@ -96,11 +96,11 @@ def trapSolver(params,save_frequency=2):
 		step_number += 1
 	return save_times, positions, velocities, total_energies
 
-def save_data(data_series, file_index=0):
+def save_data(data_series, DIR_NAME="data", file_index=0):
 	"""
 	Saves data in a .npy format for quick saving and loading
 	"""
-	np.save(f"./data/experiment-{file_index}.npy",np.vstack(data_series))
+	np.save(f"./{DIR_NAME}/experiment-{file_index}.npy",np.vstack(data_series))
 
 # stiffness, max time, gamma, kBT
 

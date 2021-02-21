@@ -1,10 +1,23 @@
 #!python3
-
-
 import time
 import numpy as np
 import glob
 import matplotlib.pyplot as plt
+import os
+
+def make_dir(dir_name):
+	"""
+	A function that creates a directory dir_name, if it doesn't exist.
+	"""
+	path = dir_name
+	try:
+		os.mkdir(path)
+	except FileExistsError:
+		print(f"Director {path} already exists")
+	except OSError:
+		print (f"Creation of the directory %s failed" % path)
+	else:
+		print ("Successfully created the directory %s " % path)
 
 def fourier_spectrum(X, sample_freq=1e-3):
 	"""
@@ -106,9 +119,54 @@ def residence_time(x,flags=1.0):
 	return (crossing_indices, rtseries, rtdistribution)
 
 
-def signal_ensemble(data_loc):
+def histogram_movie(data_loc, resolution, plot_loc):
+	"""
+	A function that returns a directory of images
+	depicting the probability density (histogram)
+	of the positions for each time step that can be
+	made into a movie.
+		data_loc : directory where the simulated data is located
+		resolution : number of bins for the histogram
+		plot_loc : directory where the plots will be placed
+	"""
+
+	# making a list of all the files
+	file_list = glob.glob(f"{data_loc}/experiment*")
+	# importing all of the data from the experiments
+	print("Importing data...")
+	all_data = np.array([np.load(file) for file in file_list])
+	# extracting time series (assumes common time scaling across exps)
+	ts = all_data[0][0]
+	# extracting all position datadata_lo
+	pos_data = np.array([all_data[i][1] for i in range(len(all_data))])
+
+	print("Producing plots...")
+	# making histogram plots
+	
+	# creating a folder to save the plots
+	make_dir(plot_loc)
+
+	for i in range(len(ts)):
+		print(f"\r{i}/{len(ts)}",end="")
+		plt.clf() # clear figure
+		plt.xlim(-1.5,1.5) # setting common x axis
+		# we are taking the histogram across experiments
+		# for each timestep, hence the transposing
+		plt.hist(pos_data.T[i],bins=resolution,range=(-1.0,1.0)) # plotting histogram
+		plt.title(f"Time : {ts[i]} units") # keeping track of time
+		plt.savefig(f"./{plot_loc}/step-{i:05n}.png")
+	print("\nPlot production complete!")
+	# the plots then can be made into a movie to see the development
+	# of the histograms using (requires FFMPEG)
+	#	ffmpeg -framerate 24 -i step-%05d.png output.mp4
+	
+
+def signal_ensemble(data_loc,resolution,plot_loc):
 	"""
 	A function that returns heatmap of the position distributions
+		data_loc : directory where the simulated data is located
+		resolution : number of bins for the histogram
+		plot_loc : directory where the plots will be placed
 	"""
 	# making a list of all the files
 	file_list = glob.glob(f"{data_loc}/experiment*")
@@ -117,18 +175,35 @@ def signal_ensemble(data_loc):
 	all_data = np.array([np.load(file) for file in file_list])
 	# extracting time series (assumes common time scaling across exps)
 	ts = all_data[0][0]
-	# extracting all position data
+	# extracting all position datadata_lo
 	pos_data = np.array([all_data[i][1] for i in range(len(all_data))])
 
 	print("Producing plots...")
 	# making histogram plots
-	for i in range(len(ts)):
-		print(f"\r{i}/{len(ts)}",end="")
-		plt.clf() # clear figure
-		plt.xlim(-1,1) # setting common x axis
-		# we are taking the histogram across experiments
-		# for each timestep, hence the transposing
-		plt.hist(pos_data.T[i]) # plotting histogram
-		plt.title(f"Time : {ts[i]} units") # keeping track of time
-		plt.savefig(f"./plots/step-{i:05n}.png")
-	print("\nPlot production complete!")
+	
+	# creating a folder to save the plots
+	make_dir(plot_loc)
+
+	ensemble_histogram = np.array([np.histogram(pos_data.T[i], bins=resolution, range=(-1.0,1.0))[0] for i in range(len(ts))])
+	# generates a 2D histogram for each time step
+
+	# displaying the histogram
+	plt.pcolor(ensemble_histogram.T)
+	# relabeling axes
+	
+	# making the ticks correct
+	# firstly, the xticks
+	x_t_pos = range(0,1000,100) # we are sticking to just 10 ticks
+	x_t_labels = [f"{t:.2f}" for t in ts[::100]] # choosing the right time values
+	plt.xticks(x_t_pos, x_t_labels)	
+	# now, the yticks
+	y_t_pos = range(0,resolution,1)
+	y_t_labels = [f"{x:.2f}" for x in np.linspace(-1.0,1.0,resolution)]
+	plt.yticks(y_t_pos, y_t_labels)
+	plt.xlabel("Time")
+	plt.ylabel("Position")
+	plt.title("Probability distribution of nanosphere across time")
+	plt.show()
+	plt.savefig(f"{plot_loc}/plot.png")
+
+	
