@@ -161,6 +161,7 @@ def histogram_movie(data_loc, resolution, plot_loc):
 def velocity_distribution(data_loc, resolution, plot_loc):
 	"""
 		A function that shows the distribution of velocities and superimposes the predicted Maxwell-Boltzmann distribution
+		WARNING : INCOMPLETE
 	"""
 	file_list = glob.glob(f"{data_loc}/experiment*")
 	# importing all of the data from the experiments
@@ -242,8 +243,8 @@ def signal_ensemble(data_loc,resolution,plot_loc):
 	
 	# making the ticks correct
 	# firstly, the xticks
-	x_t_pos = range(0,1000,100) # we are sticking to just 10 ticks
-	x_t_labels = [f"{t:.2f}" for t in ts[::100]] # choosing the right time values
+	x_t_pos = range(0,len(ts),len(ts)//10) # we are sticking to just 10 ticks
+	x_t_labels = [f"{t:.2f}" for t in ts[::len(ts)//10]] # choosing the right time values
 	plt.xticks(x_t_pos, x_t_labels)	
 	# now, the yticks
 	y_t_pos = range(0,resolution,1)
