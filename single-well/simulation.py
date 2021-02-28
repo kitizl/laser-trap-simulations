@@ -17,15 +17,19 @@ def potential(x, params, grad=False):
 	else: # if we need the potential directly
 		return (k*x**2)/2
 
-def var_stiffness(t,t0=2):
+def var_stiffness(t,t0=4):
 	"""
 	A function where we can vary the stiffness of the trap
 	as a function of time some given function
 	"""
-	if t<t0: # after some specific t0, stiffness shoots up
-		return 0.5
-	else:
-		return 1.0
+	# using a logistic (sigmoid) function
+	# k_max is maximum value
+	# steep is the steepness
+	# t0 is when the stiffness is halfway to the max value
+	k_min = 0.5
+	k_max = 10.0
+	steep = 10.0
+	return k_min + (k_max-k_min)/(1+np.exp(-steep*(t-t0)))
 
 
 def trapSolver(params,save_frequency=2):
@@ -86,7 +90,7 @@ def trapSolver(params,save_frequency=2):
 		v = update_v(v,-potential(x,stiffness(t),True),dt)
 
 		if abs(step_number%save_frequency) <1e-6 and step_number>0:
-			e_total = 0.5*v*v + potential(x,stiffness(0))
+			e_total = 0.5*v*v + potential(x,stiffness(t))
 
 			positions.append(x)
 			velocities.append(v)
@@ -96,11 +100,26 @@ def trapSolver(params,save_frequency=2):
 		step_number += 1
 	return save_times, positions, velocities, total_energies
 
+def make_dir(dir_name):
+	"""
+	A function that creates a directory dir_name, if it doesn't exist.
+	"""
+	path = dir_name
+	try:
+		os.mkdir(path)
+	except FileExistsError:
+		print(f"Director {path} already exists")
+	except OSError:
+		print (f"Creation of the directory %s failed" % path)
+	else:
+		print ("Successfully created the directory %s " % path)
+
 def save_data(data_series, DIR_NAME="data", file_index=0):
 	"""
 	Saves data in a .npy format for quick saving and loading
 	"""
-	np.save(f"./{DIR_NAME}/experiment-{file_index}.npy",np.vstack(data_series))
+	# create a directory if it doesn't exist
+	np.save(f"{DIR_NAME}/experiment-{file_index}.npy",np.vstack(data_series))
 
 # stiffness, max time, gamma, kBT
 

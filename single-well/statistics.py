@@ -57,7 +57,6 @@ def signaltonoise(fs, ps, f_d):
 
 	return 10*np.log10(signal/noise)
 
-
 def residence_time(x,flags=1.0):
 	"""
 	Returns the residence time distribution for a given signal x
@@ -118,7 +117,6 @@ def residence_time(x,flags=1.0):
 	# returns the indices when the flags were triggered, the timing series and the distribution overall
 	return (crossing_indices, rtseries, rtdistribution)
 
-
 def histogram_movie(data_loc, resolution, plot_loc):
 	"""
 	A function that returns a directory of images
@@ -159,7 +157,56 @@ def histogram_movie(data_loc, resolution, plot_loc):
 	# the plots then can be made into a movie to see the development
 	# of the histograms using (requires FFMPEG)
 	#	ffmpeg -framerate 24 -i step-%05d.png output.mp4
-	
+
+def velocity_distribution(data_loc, resolution, plot_loc):
+	"""
+		A function that shows the distribution of velocities and superimposes the predicted Maxwell-Boltzmann distribution
+	"""
+	file_list = glob.glob(f"{data_loc}/experiment*")
+	# importing all of the data from the experiments
+	print("Importing data...")
+	all_data = np.array([np.load(file) for file in file_list])
+	# extracting time series (assumes common time scaling across exps)
+	ts = all_data[0][0]
+	# extracting all velocity data
+	vel_data = np.array([all_data[i][3] for i in range(len(all_data))])
+
+	# plotting the histogram velocities
+	plt.hist(vel_data, resolution)
+	plt.title("Velocity distribution")
+	plt.xlabel("Velocities")
+	plt.savefig(f"{plot_loc}/vel-distribution.png")
+	plt.show()
+
+def energy_evolution(data_loc, plot_loc):
+	"""
+		A function that shows the evolution of the total
+		energy of the system to see if something has gone wrong.
+	"""
+	file_list = glob.glob(f"{data_loc}/experiment*")
+	# importing all of the data from the experiments
+	print("Importing data...")
+	all_data = np.array([np.load(file) for file in file_list])
+	# extracting time series (assumes common time scaling across exps)
+	ts = all_data[0][0]
+	# extracting all position datadata_lo
+	energy_data = np.array([all_data[i][2] for i in range(len(all_data))])
+
+	# averaging the energies across the entire data set 
+	# for each timestep
+	ensemble_average = np.array([np.mean(energy_data.T[i]) for i in range(len(ts))])
+
+	# plotting the evolution of averge energy
+	plt.plot(ts,ensemble_average, label="Ensemble average")
+	# plotting two individual trials to show stochastic nature
+	#plt.plot(ts,energy_data[0],energy_data[-1], label="Individual sample trials")
+	# adding labels
+	plt.title("Energy evolution over time")
+	plt.xlabel("Time")
+	plt.ylabel("Energy")
+	plt.legend()
+	plt.savefig(f"{plot_loc}/energy-evolution.png")
+	plt.show()
 
 def signal_ensemble(data_loc,resolution,plot_loc):
 	"""
@@ -184,6 +231,8 @@ def signal_ensemble(data_loc,resolution,plot_loc):
 	# creating a folder to save the plots
 	make_dir(plot_loc)
 
+	# TODO: range = 2*waist of laser <= get waist from stiffness
+	# TODO: 3x max amp of pos
 	ensemble_histogram = np.array([np.histogram(pos_data.T[i], bins=resolution, range=(-1.0,1.0))[0] for i in range(len(ts))])
 	# generates a 2D histogram for each time step
 
@@ -203,7 +252,9 @@ def signal_ensemble(data_loc,resolution,plot_loc):
 	plt.xlabel("Time")
 	plt.ylabel("Position")
 	plt.title("Probability distribution of nanosphere across time")
-	plt.show()
+	# always save figure before showing!!!
 	plt.savefig(f"{plot_loc}/plot.png")
+	plt.show()
+
 
 	
