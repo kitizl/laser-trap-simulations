@@ -5,3 +5,9 @@
 # and if that was not clear, then the folder
 
 single-well/papers
+
+# ignore all data and plot folders
+
+data*
+
+plot*
