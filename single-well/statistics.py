@@ -235,20 +235,21 @@ def signal_ensemble(data_loc,resolution,plot_loc):
 	# TODO: range = 2*waist of laser <= get waist from stiffness
 	# TODO: 3x max amp of pos
 	ensemble_histogram = np.array([np.histogram(pos_data.T[i], bins=resolution, range=(-1.0,1.0))[0] for i in range(len(ts))])
-	# generates a 2D histogram for each time step
+	# A 2D matrix where each row is a histogram of position for each timestep
 
 	# displaying the histogram
-	plt.pcolor(ensemble_histogram.T)
+	plt.pcolor(ensemble_histogram.T) # such that x-axis is time and y-axis is position
+
 	# relabeling axes
 	
 	# making the ticks correct
 	# firstly, the xticks
-	x_t_pos = range(0,len(ts),len(ts)//10) # we are sticking to just 10 ticks
+	x_t_pos = np.linspace(0,len(ts),10) # we are sticking to just 10 ticks
 	x_t_labels = [f"{t:.2f}" for t in ts[::len(ts)//10]] # choosing the right time values
 	plt.xticks(x_t_pos, x_t_labels)	
 	# now, the yticks
-	y_t_pos = range(0,resolution,1)
-	y_t_labels = [f"{x:.2f}" for x in np.linspace(-1.0,1.0,resolution)]
+	y_t_pos = np.linspace(0,resolution,10)
+	y_t_labels = [f"{x:.2f}" for x in np.linspace(-1.0,1.0,10)]
 	plt.yticks(y_t_pos, y_t_labels)
 	plt.xlabel("Time")
 	plt.ylabel("Position")
