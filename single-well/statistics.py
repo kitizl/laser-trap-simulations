@@ -203,8 +203,8 @@ def energy_evolution(data_loc, plot_loc):
 	#plt.plot(ts,energy_data[0],energy_data[-1], label="Individual sample trials")
 	# adding labels
 	plt.title("Energy evolution over time")
-	plt.xlabel("Time")
-	plt.ylabel("Energy")
+	plt.xlabel("Time [s]")
+	plt.ylabel("Energy [J}")
 	plt.legend()
 	plt.savefig(f"{plot_loc}/energy-evolution.png")
 	plt.show()
@@ -252,8 +252,8 @@ def signal_ensemble(data_loc,resolution,plot_loc):
 	y_t_pos = np.linspace(0,resolution,10)
 	y_t_labels = [f"{x:.2E}" for x in np.linspace(-amplitude,amplitude,10)]
 	plt.yticks(y_t_pos, y_t_labels)
-	plt.xlabel("Time")
-	plt.ylabel("Position")
+	plt.xlabel("Time [s]")
+	plt.ylabel("Position [m]")
 	plt.title("Probability distribution of nanosphere across time")
 	# always save figure before showing!!!
 	plt.savefig(f"{plot_loc}/plot.png")
