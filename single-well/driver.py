@@ -3,11 +3,11 @@
 """
 This is the main driver code. Run this to get data.
 """
-import matplotlib.pyplot as plt
 import os
 import argparse
 import sys
 import datetime
+from math import pi, sqrt
 
 def make_dir(dir_name):
 	"""
@@ -70,10 +70,27 @@ def physicalize(args):
 		pressure, temperature, etc. and turns them into the
 		numerical values required to solve the Langevin equation
 	"""
-	# defining Boltzmann constant
+	p = float(args['pressure']) * 100 # converting from mbar to Pa
+	eta = 18.27e-6 # viscosity of air [Pa*s] at ambient temperature
+	a = 71.5e-9  # particle radius [m]
+	m_a = 28.97e-3 # molecular mass of air [kg/mol]
+	N_A = 6.02214086e23  # Avogadro constant [mol-1]
+	rho = 1850 # particle density kg*m^-3
+	T = float(args['temperature']) # temperature [K]
+	kB = 1.38064852e-23 # Boltzmann constant [m^2 kg s^-2 K^ -1]
+	m = rho*(4/3)*pi*a**3 # mass of particle [kg]
+	l = (eta*(sqrt((kB*T* N_A*pi) /(2*m_a))))/p # mean free path of air molecules
+	Kn = l/a #knudsen number
 
-	kB = 1.381e-23 # J/K ; from CODATA 2019
-	return [float(args['max_time']), 10, kB*float(args['temperature']), int(args['saving_freq']), int(args['numTrials']), int(args['resolution'])]
+	# Define the following constants for simplicity:
+	A = 6*pi*eta*a/(m)
+	ck = 0.31*Kn/(0.785 + 1.152*Kn + Kn**2)
+	B = (1+ck)
+
+	# damping rate
+	Gamma = A*(0.619/(0.619+Kn))*B
+	Gamma2 = Gamma / (2*pi)
+	return [float(args['max_time']), Gamma2, kB*T, int(args['saving_freq']), int(args['numTrials']), int(args['resolution'])]
 
 if __name__ == "__main__":
 
@@ -100,7 +117,7 @@ if __name__ == "__main__":
 	# doing this multiple times so as to generate an average
 	for trial_num in range(NUM_TRIALS):
 		print(f"\r{trial_num}/{NUM_TRIALS}",end="")
-		ts,xs,vs,es = simulation.trapSolver([simulation.var_stiffness,max_time, gamma, kBT], saving_freq)
+		ts,xs,vs,es = simulation.trapSolver([simulation.gieseler_stiffness,max_time, gamma, kBT], saving_freq)
 		# save this data
 		simulation.save_data([ts,xs,vs,es],DIR_NAME=DATA_DIR,file_index=trial_num)
 	
