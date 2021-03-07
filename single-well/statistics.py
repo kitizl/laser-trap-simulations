@@ -171,7 +171,7 @@ def velocity_distribution(data_loc, resolution, plot_loc):
 	ts = all_data[0][0]
 	# extracting all velocity data
 	vel_data = np.array([all_data[i][3] for i in range(len(all_data))])
-
+	print("Producing plots...")
 	# plotting the histogram velocities
 	plt.hist(vel_data, resolution)
 	plt.title("Velocity distribution")
@@ -191,7 +191,7 @@ def energy_evolution(data_loc, plot_loc):
 	# extracting time series (assumes common time scaling across exps)
 	ts = all_data[0][0]
 	# extracting all position datadata_lo
-	energy_data = np.array([all_data[i][2] for i in range(len(all_data))])
+	energy_data = np.array([all_data[i][3] for i in range(len(all_data))])
 
 	# averaging the energies across the entire data set 
 	# for each timestep
@@ -232,9 +232,10 @@ def signal_ensemble(data_loc,resolution,plot_loc):
 	# creating a folder to save the plots
 	make_dir(plot_loc)
 
-	# TODO: range = 2*waist of laser <= get waist from stiffness
-	# TODO: 3x max amp of pos
-	ensemble_histogram = np.array([np.histogram(pos_data.T[i], bins=resolution, range=(-1.0,1.0))[0] for i in range(len(ts))])
+	# range of histogram will be experiment agnostic and is determined from the data directly
+	amplitude = max(pos_data[0])*10# for starters
+
+	ensemble_histogram = np.array([np.histogram(pos_data.T[i], bins=resolution, range=(-amplitude,amplitude))[0] for i in range(len(ts))])
 	# A 2D matrix where each row is a histogram of position for each timestep
 
 	# displaying the histogram
@@ -249,7 +250,7 @@ def signal_ensemble(data_loc,resolution,plot_loc):
 	plt.xticks(x_t_pos, x_t_labels)	
 	# now, the yticks
 	y_t_pos = np.linspace(0,resolution,10)
-	y_t_labels = [f"{x:.2f}" for x in np.linspace(-1.0,1.0,10)]
+	y_t_labels = [f"{x:.2E}" for x in np.linspace(-amplitude,amplitude,10)]
 	plt.yticks(y_t_pos, y_t_labels)
 	plt.xlabel("Time")
 	plt.ylabel("Position")
