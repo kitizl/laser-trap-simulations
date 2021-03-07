@@ -17,7 +17,28 @@ def potential(x, params, grad=False):
 	else: # if we need the potential directly
 		return (k*x**2)/2
 
-def var_stiffness(t,t0=4):
+def gieseler_stiffness(t):
+	"""
+		A physically realistic function that determines stiffness
+		of the trap at time t (constant for now) using constants
+		determined by Gieseler in their PhD thesis.
+	"""
+	waist = 687e-9 # meters
+	perm =  8.8541878128e-12 # farad/meter
+	wave = 2*np.pi/(1064e-9) # wavenumber of the laser
+	a = 71.5e-9  # particle radius [m]
+	V = 4/3*np.pi*a**3 # volume of particle (assuming full spherical symmetry)
+	# in air, dielectric constant of medium is basically the same as permittivity
+	em = perm
+	# but that of the particle is
+	ep = 0 #:shrug:
+	alpha = 3*V*perm*(ep-em)/(ep+2*em) # Clausius-Mossotti relation
+	pol_eff = alpha/(1 + (((wave**3)/(6*np.pi*perm))**2) * (alpha**2)) # calculating (real) effective polarizability
+	E_0 = 20 # placeholder, I have no idea what the intensity of the laser is
+	k = pol_eff*E_0**2/waist**2 # calculating stiffness from polarizability, laser intensity and waist width
+	return k
+
+def var_stiffness(t,t0=10):
 	"""
 	A function where we can vary the stiffness of the trap
 	as a function of time some given function
@@ -27,8 +48,8 @@ def var_stiffness(t,t0=4):
 	# steep is the steepness
 	# t0 is when the stiffness is halfway to the max value
 	k_min = 0.5
-	k_max = 10.0
-	steep = 10.0
+	k_max = k_min
+	steep = 100.0
 	return k_min + (k_max-k_min)/(1+np.exp(-steep*(t-t0)))
 
 
