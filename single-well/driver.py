@@ -7,6 +7,7 @@ import os
 import argparse
 import sys
 import datetime
+import matplotlib.pyplot as plt
 from math import pi, sqrt
 
 def make_dir(dir_name):
@@ -40,11 +41,7 @@ def parse_arguments():
 	all_args.add_argument("-s","--saving_freq",required=True,help="saving frequency (number of steps per save)")
 	all_args.add_argument("-N","--numTrials", required=True,help="number of trials that need to be run")
 	all_args.add_argument("-r","--resolution",required=True,help="resolution for the histogram")
-
-	# TODO : add optional argument to turn verbose mode off
-	#		 which is currently the default
-	# TODO: add optional argument for labelling the directories
-	#		default being : `dir_n{NUM_TRIALS}_t{max_time}_datetime`
+	all_args.add_argument("-l","--label",required=False, help="label for the experiment")
 
 	args = vars(all_args.parse_args())
 
@@ -90,13 +87,14 @@ def physicalize(args):
 	# damping rate
 	Gamma = A*(0.619/(0.619+Kn))*B
 	Gamma2 = Gamma / (2*pi)
-	return [float(args['max_time']), Gamma2, kB*T, int(args['saving_freq']), int(args['numTrials']), int(args['resolution'])]
+
+	return [float(args['max_time']), m,Gamma2, kB*T, int(args['saving_freq']), int(args['numTrials']), int(args['resolution']),args['label']]
 
 if __name__ == "__main__":
 
 	import simulation
 	params = parse_arguments() # importing experimental parameters
-	max_time, gamma, kBT, saving_freq, NUM_TRIALS, resolution = physicalize(params)
+	max_time, mass, gamma, kBT, saving_freq, NUM_TRIALS, resolution, label = physicalize(params)
 
 	# directory format is YYYYMMDD_HHMM
 
@@ -104,10 +102,18 @@ if __name__ == "__main__":
 	# we desire for our directories
 	# crucial assumption here being two RUNS will not complete
 	# within the minute
-	timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M")\
+	timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M")
+	DATA_DIR = "data"
+	PLOT_DIR = "plot"
 
-	DATA_DIR = f"data_n{NUM_TRIALS}_{timestamp}"
-	PLOT_DIR = f"plot_n{NUM_TRIALS}_{timestamp}"
+	if label is None:
+		# if a label is not provided, then use default naming conventions
+		DATA_DIR += f"_n{NUM_TRIALS}_{timestamp}"
+		PLOT_DIR += f"_n{NUM_TRIALS}_{timestamp}"
+	else:
+		# if a label is provided, then use label for directory naming
+		DATA_DIR += f"_{label}"
+		PLOT_DIR += f"_{label}"
 
 	make_dir(DATA_DIR) # making the directory where the data will end up
 
@@ -117,7 +123,7 @@ if __name__ == "__main__":
 	# doing this multiple times so as to generate an average
 	for trial_num in range(NUM_TRIALS):
 		print(f"\r{trial_num}/{NUM_TRIALS}",end="")
-		ts,xs,vs,es = simulation.trapSolver([simulation.gieseler_stiffness,max_time, gamma, kBT], saving_freq)
+		ts,xs,vs,es = simulation.trapSolver([simulation.var_stiffness,mass,max_time, gamma, kBT], saving_freq)
 		# save this data
 		simulation.save_data([ts,xs,vs,es],DIR_NAME=DATA_DIR,file_index=trial_num)
 	
