@@ -198,7 +198,7 @@ def energy_evolution(data_loc, plot_loc):
 	ensemble_average = np.array([np.mean(energy_data.T[i]) for i in range(len(ts))])
 
 	# plotting the evolution of averge energy
-	plt.plot(ts,ensemble_average, label="Ensemble average")
+	plt.plot(ts,ensemble_average, 'bo-',label="Ensemble average")
 	# plotting two individual trials to show stochastic nature
 	#plt.plot(ts,energy_data[0],energy_data[-1], label="Individual sample trials")
 	# adding labels
@@ -208,6 +208,35 @@ def energy_evolution(data_loc, plot_loc):
 	plt.legend()
 	plt.savefig(f"{plot_loc}/energy-evolution.png")
 	plt.show()
+
+def energy_variance(data_loc, plot_loc):
+	"""
+		A function that returns a plot of how much the energy varies with time
+	"""
+	file_list = glob.glob(f"{data_loc}/experiment*")
+	# importing all of the data from the experiments
+	print("Importing data...")
+	all_data = np.array([np.load(file) for file in file_list])
+	# extracting time series (assumes common time scaling across exps)
+	ts = all_data[0][0]
+	# extracting all position datadata_lo
+	energy_data = np.array([all_data[i][3] for i in range(len(all_data))])
+	# averaging the energies across the entire data set 
+	# for each timestep
+	ensemble_average = np.array([np.mean(energy_data.T[i]) for i in range(len(ts))])
+
+	var_ensemble = np.std(ensemble_average) # difference between each data point and its mean
+	print(f"Variance of energies for current experiment : {var_ensemble}")
+	plt.plot(ts, ensemble_average, label="Ensemble average")
+	plt.plot(ts, np.abs(ensemble_average-np.mean(ensemble_average)), label="Variations from mean")
+
+	plt.title("Energy evolution and variations over time")
+	plt.xlabel("Time [s]")
+	plt.ylabel("Energy [J}")
+	plt.legend()
+	plt.savefig(f"{plot_loc}/energy-profile.png")
+	plt.show()
+
 
 def signal_ensemble(data_loc,resolution,plot_loc):
 	"""
@@ -233,9 +262,11 @@ def signal_ensemble(data_loc,resolution,plot_loc):
 	make_dir(plot_loc)
 
 	# range of histogram will be experiment agnostic and is determined from the data directly
-	amplitude = max(pos_data[0])*10# for starters
+
+	amplitude = abs(max(pos_data[0]))*1.5# for starters
 
 	ensemble_histogram = np.array([np.histogram(pos_data.T[i], bins=resolution, range=(-amplitude,amplitude))[0] for i in range(len(ts))])
+
 	# A 2D matrix where each row is a histogram of position for each timestep
 
 	# displaying the histogram
