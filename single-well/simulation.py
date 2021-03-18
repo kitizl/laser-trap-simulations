@@ -17,11 +17,11 @@ def potential(x, params, grad=False):
 	else: # if we need the potential directly
 		return (k*x**2)/2
 
-def gieseler_stiffness(t):
+def gieseler_stiffness():
 	"""
 		A physically realistic function that determines stiffness
 		of the trap at time t (constant for now) using constants
-		determined by Gieseler in their PhD thesis.
+		determined by Jan Gieseler in their PhD thesis.
 	"""
 	waist = 687e-9 # meters
 	perm =  8.8541878128e-12 # farad/meter
@@ -31,14 +31,14 @@ def gieseler_stiffness(t):
 	# in air, dielectric constant of medium is basically the same as permittivity
 	em = perm
 	# but that of the particle is
-	ep = 0 #:shrug:
+	ep = 11.9*perm #:shrug:
 	alpha = 3*V*perm*(ep-em)/(ep+2*em) # Clausius-Mossotti relation
 	pol_eff = alpha/(1 + (((wave**3)/(6*np.pi*perm))**2) * (alpha**2)) # calculating (real) effective polarizability
-	E_0 = 20 # placeholder, I have no idea what the intensity of the laser is
+	E_0 = 2e3 # placeholder, I have no idea what the intensity of the laser is
 	k = pol_eff*E_0**2/waist**2 # calculating stiffness from polarizability, laser intensity and waist width
 	return k
 
-def var_stiffness(t,t0=10):
+def var_stiffness(t,t0=5):
 	"""
 	A function where we can vary the stiffness of the trap
 	as a function of time some given function
@@ -47,10 +47,49 @@ def var_stiffness(t,t0=10):
 	# k_max is maximum value
 	# steep is the steepness
 	# t0 is when the stiffness is halfway to the max value
-	k_min = 0.5
-	k_max = k_min
-	steep = 100.0
+	k_min = gieseler_stiffness()
+	k_max = 1.2*k_min
+	steep = 10.0
 	return k_min + (k_max-k_min)/(1+np.exp(-steep*(t-t0)))
+
+def langevinEuler(params, save_frequency=2):
+	"""
+	Uses Euler-Maruyama scheme to integrate
+	Returns the times, positions and velocities of
+	the nanosphere in the trap for a given set of 
+	parameters (damping and so on) and a rate of saving data
+
+	params : stiffness, max_time, damping constant gamma, k_B T
+	save_frequency : number of steps between saving data
+	"""
+	stiffness, mass, max_time, gamma, kBT = params # setting parameters
+	# all initial conditions set to 0
+	x = 1e-8 # initial position for time being
+	v = 0
+	t = 0
+	dt = 1e-6
+	step_number = 0
+	positions = []
+	velocities= []
+	total_energies = []
+	save_times = []
+
+	while t < max_time:
+
+		a = (-potential(x, stiffness(t), True))/mass # acceleration
+		x = x + v*dt # updating position
+		v = v + a*dt # updating velocity
+
+		if abs(step_number%save_frequency) <1e-6 and step_number>0:
+			e_total = 0.5*v*v + potential(x,stiffness(t))
+
+			positions.append(x)
+			velocities.append(v)
+			total_energies.append(e_total)
+			save_times.append(t)
+		t = t+dt
+		step_number += 1
+	return save_times, positions, velocities, total_energies
 
 
 def trapSolver(params,save_frequency=2):
@@ -70,16 +109,16 @@ def trapSolver(params,save_frequency=2):
 		# 'macro' to update velocity
 		return v+F*dt/2
 
-	def random_update(v,gamma,kBT, dt):
+	def random_update(v,gamma,mass,kBT, dt):
 		# 'macro' to update velocity with the random noise
 		R = np.random.normal()
-		damping = np.exp(-gamma*dt) # this is following the BAOAB scheme
-		random_kick = np.sqrt(1-damping*damping)*np.sqrt(kBT)
+		damping = np.exp(-gamma*dt) # through solving stochastic eq.
+		random_kick = np.sqrt(1-damping*damping)*np.sqrt(kBT/mass)
 		return damping*v + R*random_kick
 
-	stiffness, max_time, gamma, kBT = params # setting parameters
+	stiffness, mass, max_time, gamma, kBT = params # setting parameters
 	# all initial conditions set to 0
-	x = 0
+	x = 0 # initial position for time being
 	v = 0
 	t = 0
 	dt = 1e-3
@@ -92,7 +131,7 @@ def trapSolver(params,save_frequency=2):
 	while(t<max_time):
 		# B
 
-		v = update_v(v,-potential(x,stiffness(t),True),dt)
+		v = update_v(v,-potential(x,stiffness(t),True)/mass,dt)
 
 		# A
 
@@ -100,7 +139,7 @@ def trapSolver(params,save_frequency=2):
 
 		# O
 
-		v = random_update(v,gamma,kBT,dt)
+		v = random_update(v,gamma,mass,kBT,dt)
 
 		# A
 
@@ -108,8 +147,9 @@ def trapSolver(params,save_frequency=2):
 
 		# B
 
-		v = update_v(v,-potential(x,stiffness(t),True),dt)
+		v = update_v(v,-potential(x,stiffness(t),True)/mass,dt)
 
+		v = update_v(v,0,dt)
 		if abs(step_number%save_frequency) <1e-6 and step_number>0:
 			e_total = 0.5*v*v + potential(x,stiffness(t))
 
