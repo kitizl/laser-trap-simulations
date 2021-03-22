@@ -38,7 +38,7 @@ def gieseler_stiffness():
 	k = pol_eff*E_0**2/waist**2 # calculating stiffness from polarizability, laser intensity and waist width
 	return k
 
-def var_stiffness(t,t0=5):
+def var_stiffness(t,t0=0.5):
 	"""
 	A function where we can vary the stiffness of the trap
 	as a function of time some given function
@@ -48,7 +48,7 @@ def var_stiffness(t,t0=5):
 	# steep is the steepness
 	# t0 is when the stiffness is halfway to the max value
 	k_min = gieseler_stiffness()
-	k_max = 1.2*k_min
+	k_max = 10*k_min
 	steep = 10.0
 	return k_min + (k_max-k_min)/(1+np.exp(-steep*(t-t0)))
 
@@ -151,7 +151,7 @@ def trapSolver(params,save_frequency=2):
 
 		v = update_v(v,0,dt)
 		if abs(step_number%save_frequency) <1e-6 and step_number>0:
-			e_total = 0.5*v*v + potential(x,stiffness(t))
+			e_total = 0.5*mass*v*v + potential(x,stiffness(t))
 
 			positions.append(x)
 			velocities.append(v)
