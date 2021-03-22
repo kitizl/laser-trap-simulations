@@ -18,7 +18,7 @@ def make_dir(dir_name):
 	try:
 		os.mkdir(path)
 	except FileExistsError:
-		print(f"Director {path} already exists")
+		print(f"Directory {path} already exists")
 	except OSError:
 		print (f"Creation of the directory %s failed" % path)
 	else:
@@ -139,11 +139,12 @@ if __name__ == "__main__":
 	print("Producing energy evolution plots")
 	statistics.energy_evolution(DATA_DIR,PLOT_DIR)
 	# once this is done, you should have a folder of plot data and a movie
+	print("Analysis complete!")
 
 	# once all of this is complete, we then add a METADATA file
 	# that contains the parameters that went into producing these
 	# numerical results
-
+	print("Saving ")
 	with open(f"{DATA_DIR}/METADATA-experiment-{timestamp}.txt",'w') as fhand:
 		fhand.write(f"# Metadata\n\
 ## Experimental Parameters\n\
