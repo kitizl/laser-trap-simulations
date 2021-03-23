@@ -190,28 +190,37 @@ def energy_evolution(data_loc, plot_loc):
 	all_data = np.array([np.load(file) for file in file_list])
 	# extracting time series (assumes common time scaling across exps)
 	ts = all_data[0][0]
-	# extracting all position datadata_lo
-	energy_data = np.array([all_data[i][3] for i in range(len(all_data))])
+	# extracting all kinetic energy
+	kinetic_energy_data = np.array([all_data[i][3] for i in range(len(all_data))])
+	potential_energy_data = np.array([all_data[i][4] for i in range(len(all_data))])
 
 	# averaging the energies across the entire data set 
 	# for each timestep
-	ensemble_average = np.array([np.mean(energy_data.T[i]) for i in range(len(ts))])
+	kinetic_average = np.array([np.mean(kinetic_energy_data.T[i]) for i in range(len(ts))])
+	potential_average = np.array([np.mean(potential_energy_data.T[i]) for i in range(len(ts))])
+	total_average = kinetic_average + potential_average
 
+	fig, axs = plt.subplots(3,1,sharex=True, sharey=True)
+	# plotting the evolution of kinetic energy
+	axs[0].plot(ts,kinetic_average,'ro-')
+	axs[0].set_title("Kinetic")
+	# plotting the evolution of potential energy
+	axs[1].plot(ts,potential_average,'bo-')
+	axs[1].set_title("Potential")
 	# plotting the evolution of averge energy
-	plt.plot(ts,ensemble_average, 'bo-',label="Ensemble average")
-	# plotting two individual trials to show stochastic nature
-	#plt.plot(ts,energy_data[0],energy_data[-1], label="Individual sample trials")
+	axs[2].plot(ts,total_average, 'go-')
+	axs[2].set_title("Total Energy")
+
 	# adding labels
-	plt.title("Energy evolution over time")
+	fig.suptitle("Energy evolution over time")
 	plt.xlabel("Time [s]")
-	plt.ylabel("Energy [J}")
-	plt.legend()
-	plt.savefig(f"{plot_loc}/energy-evolution.png")
+	plt.ylabel("Energy [J]")
+	fig.savefig(f"{plot_loc}/energy-evolution.png")
 	plt.show()
 
 def energy_variance(data_loc, plot_loc):
 	"""
-		A function that returns a plot of how much the energy varies with time
+		A function that returns a plot of how much the total energy varies with time
 	"""
 	file_list = glob.glob(f"{data_loc}/experiment*")
 	# importing all of the data from the experiments
@@ -219,8 +228,8 @@ def energy_variance(data_loc, plot_loc):
 	all_data = np.array([np.load(file) for file in file_list])
 	# extracting time series (assumes common time scaling across exps)
 	ts = all_data[0][0]
-	# extracting all position datadata_lo
-	energy_data = np.array([all_data[i][3] for i in range(len(all_data))])
+	# extracting all energy data
+	energy_data = np.array([all_data[i][3]+all_data[i][4] for i in range(len(all_data))])
 	# averaging the energies across the entire data set 
 	# for each timestep
 	ensemble_average = np.array([np.mean(energy_data.T[i]) for i in range(len(ts))])

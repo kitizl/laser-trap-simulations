@@ -125,7 +125,8 @@ def trapSolver(params,save_frequency=2):
 	step_number = 0
 	positions = []
 	velocities= []
-	total_energies = []
+	kinetic_energy = []
+	potential_energy = []
 	save_times = []
 
 	while(t<max_time):
@@ -151,15 +152,17 @@ def trapSolver(params,save_frequency=2):
 
 		v = update_v(v,0,dt)
 		if abs(step_number%save_frequency) <1e-6 and step_number>0:
-			e_total = 0.5*mass*v*v + potential(x,stiffness(t))
+			kin = 0.5*mass*v*v # calculating kinetic energy
+			pot = potential(x,stiffness(t)) # calculating potential energy
 
 			positions.append(x)
 			velocities.append(v)
-			total_energies.append(e_total)
+			kinetic_energy.append(kin)
+			potential_energy.append(pot)
 			save_times.append(t)
 		t = t+dt
 		step_number += 1
-	return save_times, positions, velocities, total_energies
+	return save_times, positions, velocities, kinetic_energy, potential_energy
 
 def make_dir(dir_name):
 	"""
