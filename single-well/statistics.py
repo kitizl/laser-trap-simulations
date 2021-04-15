@@ -201,22 +201,24 @@ def energy_evolution(data_loc, plot_loc):
 	total_average = kinetic_average + potential_average
 
 	fig, axs = plt.subplots(3,1,sharex=True, sharey=True)
+	fig.set_figheight(7)
+	fig.set_figwidth(9)
 	# plotting the evolution of kinetic energy
-	axs[0].plot(ts,kinetic_average,'ro-')
-	axs[0].set_title("Kinetic")
+	axs[0].plot(ts,kinetic_average,'r-')
+	axs[0].set_title("Kinetic",fontsize=14)
 	# plotting the evolution of potential energy
-	axs[1].plot(ts,potential_average,'bo-')
-	axs[1].set_title("Potential")
+	axs[1].plot(ts,potential_average,'b-')
+	axs[1].set_title("Potential",fontsize=14)
 	# plotting the evolution of averge energy
-	axs[2].plot(ts,total_average, 'go-')
-	axs[2].set_title("Total Energy")
+	axs[2].plot(ts,total_average, 'g-')
+	axs[2].set_title("Total Energy",fontsize=14)
 
-	# adding labels
-	fig.suptitle("Energy evolution over time")
-	plt.xlabel("Time [s]")
-	plt.ylabel("Energy [J]")
+	fig.suptitle("Energy evolution over time", fontsize=18)
+	plt.xlabel("Time [s]",fontsize=16)
+	axs[1].set_ylabel("Energy [J]",fontsize=16)
 	fig.savefig(f"{plot_loc}/energy-evolution.png")
 	plt.show()
+
 
 def energy_variance(data_loc, plot_loc):
 	"""
@@ -281,7 +283,7 @@ def signal_ensemble(data_loc,resolution,plot_loc):
 
 	# using figures and subplots
 	fig, ax = plt.subplots(1)
-	fig.set_figheight(10)
+	fig.set_figheight(6)
 	fig.set_figwidth(12)
 	hist = ax.pcolor(ensemble_histogram.T,cmap='inferno') # such that x-axis is time and y-axis is position
 	# adding colorbar
