@@ -246,7 +246,6 @@ def energy_variance(data_loc, plot_loc):
 	plt.savefig(f"{plot_loc}/energy-profile.png")
 	plt.show()
 
-
 def signal_ensemble(data_loc,resolution,plot_loc):
 	"""
 	A function that returns heatmap of the position distributions
@@ -272,31 +271,41 @@ def signal_ensemble(data_loc,resolution,plot_loc):
 
 	# range of histogram will be experiment agnostic and is determined from the data directly
 
-	amplitude = abs(max(pos_data[0]))*1.5# for starters
+	amplitude = max(abs(pos_data[0]))*1.5# for starters
 
-	ensemble_histogram = np.array([np.histogram(pos_data.T[i], bins=resolution, range=(-amplitude,amplitude))[0] for i in range(len(ts))])
+	ensemble_histogram = np.array([np.histogram(pos_data.T[i], bins=resolution, range=(-amplitude,amplitude), weights=np.ones_like(pos_data.T[i]) / len(pos_data.T[i]))[0] for i in range(len(ts))])
 
 	# A 2D matrix where each row is a histogram of position for each timestep
 
-	# displaying the histogram
-	plt.pcolor(ensemble_histogram.T) # such that x-axis is time and y-axis is position
+	# displaying the plot
 
+	# using figures and subplots
+	fig, ax = plt.subplots(1)
+	fig.set_figheight(10)
+	fig.set_figwidth(12)
+	hist = ax.pcolor(ensemble_histogram.T,cmap='inferno') # such that x-axis is time and y-axis is position
+	# adding colorbar
+	fig.colorbar(hist, ax=ax)
 	# relabeling axes
-	
+
 	# making the ticks correct
 	# firstly, the xticks
 	x_t_pos = np.linspace(0,len(ts),10) # we are sticking to just 10 ticks
 	x_t_labels = [f"{t:.2f}" for t in ts[::len(ts)//10]] # choosing the right time values
-	plt.xticks(x_t_pos, x_t_labels)	
+	ax.set_xticks(x_t_pos)
+	ax.set_xticklabels(x_t_labels,fontsize=12)
 	# now, the yticks
 	y_t_pos = np.linspace(0,resolution,10)
 	y_t_labels = [f"{x:.2E}" for x in np.linspace(-amplitude,amplitude,10)]
-	plt.yticks(y_t_pos, y_t_labels)
-	plt.xlabel("Time [s]")
-	plt.ylabel("Position [m]")
-	plt.title("Probability distribution of nanosphere across time")
-	# always save figure before showing!!!
-	plt.savefig(f"{plot_loc}/plot.png")
+	ax.set_yticks(y_t_pos)
+	ax.set_yticklabels(y_t_labels,fontsize=12)
+	ax.set_xlabel("Time [s]",fontsize=16)
+	ax.set_ylabel("Position [m]",fontsize=16)
+	ax.set_title("Probability distribution of nanosphere across time",fontsize=18)
+
+
+
+	plt.savefig(f"{plot_loc}/plot.png",bbox_inches='tight')
 	plt.show()
 
 
