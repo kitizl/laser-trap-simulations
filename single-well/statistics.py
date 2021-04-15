@@ -219,7 +219,6 @@ def energy_evolution(data_loc, plot_loc):
 	fig.savefig(f"{plot_loc}/energy-evolution.png")
 	plt.show()
 
-
 def energy_variance(data_loc, plot_loc):
 	"""
 		A function that returns a plot of how much the total energy varies with time
@@ -238,13 +237,18 @@ def energy_variance(data_loc, plot_loc):
 
 	var_ensemble = np.std(ensemble_average) # difference between each data point and its mean
 	print(f"Variance of energies for current experiment : {var_ensemble}")
-	plt.plot(ts, ensemble_average, label="Ensemble average")
-	plt.plot(ts, np.abs(ensemble_average-np.mean(ensemble_average)), label="Variations from mean")
 
-	plt.title("Energy evolution and variations over time")
-	plt.xlabel("Time [s]")
-	plt.ylabel("Energy [J}")
-	plt.legend()
+	fig, ax = plt.subplots(1)
+	fig.set_figheight(8)
+	fig.set_figwidth(12)
+
+	ax.plot(ts, ensemble_average, label="Ensemble average")
+	ax.plot(ts, np.abs(ensemble_average-np.mean(ensemble_average)), label="Variations from mean")
+
+	ax.set_title("Energy evolution and variations over time",fontsize=20)
+	ax.set_xlabel("Time [s]",fontsize=18)
+	ax.set_ylabel("Energy [J]",fontsize=18)
+	ax.legend(fontsize=15)
 	plt.savefig(f"{plot_loc}/energy-profile.png")
 	plt.show()
 
