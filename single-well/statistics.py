@@ -243,13 +243,43 @@ def energy_variance(data_loc, plot_loc):
 	fig.set_figwidth(12)
 
 	ax.plot(ts, ensemble_average, label="Ensemble average")
-	ax.plot(ts, np.abs(ensemble_average-np.mean(ensemble_average)), label="Variations from mean")
+	ax.plot(ts, ensemble_average**2-np.mean(ensemble_average)**2, label="Variations from mean")
 
 	ax.set_title("Energy evolution and variations over time",fontsize=20)
 	ax.set_xlabel("Time [s]",fontsize=18)
 	ax.set_ylabel("Energy [J]",fontsize=18)
 	ax.legend(fontsize=15)
 	plt.savefig(f"{plot_loc}/energy-profile.png")
+	plt.show()
+
+def signal_variance(data_loc, plot_loc):
+	file_list = glob.glob(f"{data_loc}/experiment*")
+	# importing all of the data from the experiments
+	print("Importing data...")
+	all_data = np.array([np.load(file) for file in file_list])
+	# extracting time series (assumes common time scaling across exps)
+	ts = all_data[0][0]
+	# extracting all position data
+	pos_data = np.array([all_data[i][1] for i in range(len(all_data))])
+	# finding the average signal and the variance in the signal (ensembles)
+	pos_average = np.array([np.mean(pos_data.T[i]) for i in range(len(ts))])
+	pos_variance = np.array([np.std(pos_data.T[i]) for i in range(len(ts))])
+
+	print(f"Mean of x = {np.mean(pos_data)}m")
+	print(f"Stdev of x = {np.std(pos_data)}m")
+
+	fig, ax = plt.subplots(1)
+	fig.set_figheight(8)
+	fig.set_figwidth(12)
+
+	ax.plot(ts, pos_average, label="Position average")
+	ax.plot(ts, pos_variance, label="Variations from mean")
+
+	ax.set_title("Ensemble evolution and variance over time",fontsize=20)
+	ax.set_xlabel("Time [s]",fontsize=18)
+	ax.set_ylabel("Position [m]",fontsize=18)
+	ax.legend(fontsize=15)
+	plt.savefig(f"{plot_loc}/signal-profile.png")
 	plt.show()
 
 def signal_ensemble(data_loc,resolution,plot_loc):
