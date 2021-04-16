@@ -40,6 +40,10 @@ mandatory arguments:
 
 The data will be stored in a folder prefixed `data`, followed by either the label you have provided, or a timestamp corresponding to when the run began. The plots produced using `statistics.py` as called from `driver.py` will be stored in a folder prefixed `plot`, followed by either the label you have provided or a timestamp correspodning to when the run began.
 
+The `data` folder will also contain a plaintext file, outlining the parameters for the experiment, named `METADATA-experiment-[$-l].txt`. It is in plaintext so as to allow additional comments if the user desires to add notes to their experimental runs.
+
+A more detailed documentation report is available upon request.
+
 ## Double-well
 
-This folder is not under active development, and might be removed in a future update when the single-well code can be (and as it stands, it in principle can) utilized to model a double well potential.
+This code is not under active development, and might be removed in a future update when the single-well code can be (and as it stands, it in principle can) utilized to model a double well potential.
