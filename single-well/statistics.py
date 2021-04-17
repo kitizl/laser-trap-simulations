@@ -158,11 +158,11 @@ def histogram_movie(data_loc, resolution, plot_loc):
 	# of the histograms using (requires FFMPEG)
 	#	ffmpeg -framerate 24 -i step-%05d.png output.mp4
 
-def velocity_distribution(data_loc, resolution, plot_loc):
+def velocity_distribution(mass, kBT, data_loc, resolution, plot_loc):
 	"""
 		A function that shows the distribution of velocities and superimposes the predicted Maxwell-Boltzmann distribution
-		WARNING : INCOMPLETE
 	"""
+
 	file_list = glob.glob(f"{data_loc}/experiment*")
 	# importing all of the data from the experiments
 	print("Importing data...")
@@ -170,14 +170,31 @@ def velocity_distribution(data_loc, resolution, plot_loc):
 	# extracting time series (assumes common time scaling across exps)
 	ts = all_data[0][0]
 	# extracting all velocity data
-	vel_data = np.array([all_data[i][3] for i in range(len(all_data))])
+	vel_data = np.array([all_data[i][2] for i in range(len(all_data))]).flatten()
 	print("Producing plots...")
 	# plotting the histogram velocities
-	plt.hist(vel_data, resolution)
-	plt.title("Velocity distribution")
-	plt.xlabel("Velocities")
-	plt.savefig(f"{plot_loc}/vel-distribution.png")
+	
+	# setting figure properties
+	fig, ax = plt.subplots(1,1)
+	fig.set_figheight(6)
+	fig.set_figwidth(9)
+
+	# drawing the expected maxwell-boltzmann distribution
+	vs = np.linspace(-0.1,0.1,100)
+	maxwell = np.exp(-0.5*mass*(vs**2)/(kBT))
+	maxwell *= mass/np.sqrt(2*np.pi*mass*kBT)
+	ax.plot(vs,maxwell,label="Normalized M-E Velocity Distribution")
+	
+	# drawing the observed distribution
+	ax.hist(vel_data, resolution,density=True,stacked=True, label="Normalized Histogram of Simulated Velocities")
+	# density and stacked need to be set to true for the heights to be normalized
+	
+	ax.set_title("Velocity distribution",fontsize=20)
+	ax.set_xlabel("Velocities [m/s]",fontsize=18)
+	ax.legend(loc='upper right')
+	plt.savefig(f"{plot_loc}/vel-distribution.png",bbox_inches='tight')
 	plt.show()
+
 
 def energy_evolution(data_loc, plot_loc):
 	"""
@@ -341,7 +358,7 @@ def signal_ensemble(data_loc,resolution,plot_loc):
 
 
 
-	plt.savefig(f"{plot_loc}/plot.png",bbox_inches='tight')
+	plt.savefig(f"{plot_loc}/signal_histogram.png",bbox_inches='tight')
 	plt.show()
 
 
