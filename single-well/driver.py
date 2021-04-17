@@ -16,7 +16,7 @@ def make_dir(dir_name):
 	"""
 	path = dir_name
 	try:
-		os.mkdir(path)
+		os.makedirs(path)
 	except FileExistsError:
 		print(f"Directory {path} already exists")
 	except OSError:
@@ -139,11 +139,24 @@ if __name__ == "__main__":
 	import statistics
 	print("Analyzing simulations...")
 
+	# plots the ensemble histogram of the position
 	print("Producing signal distribution")
 	statistics.signal_ensemble(DATA_DIR,resolution,PLOT_DIR)
-	# Providing directory where the data is, resolution (ie number of bins), directory where the plots end up
+	
+	# plots the ensemble average and variance of the positions
+	print("Producing signal profile")
+	statistics.signal_variance(DATA_DIR, PLOT_DIR)
+
+	# plots the distribution of velocities and compares with Maxwell-Boltzmann
+	print("Producing velocity distribution")
+	statistics.velocity_distribution(mass, kBT, DATA_DIR, resolution, PLOT_DIR)
+
+	# plots
 	print("Producing energy evolution plots")
 	statistics.energy_evolution(DATA_DIR,PLOT_DIR)
+	
+	print("Producing signal profile")
+	statistics.signal_variance(DATA_DIR, PLOT_DIR)
 	# once this is done, you should have a folder of plot data and a movie
 	print("Analysis complete!")
 

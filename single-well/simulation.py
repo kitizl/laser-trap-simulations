@@ -38,6 +38,13 @@ def gieseler_stiffness():
 	k = pol_eff*E_0**2/waist**2 # calculating stiffness from polarizability, laser intensity and waist width
 	return k
 
+def square_stiffness(t, omega):
+	from scipy.signal import square
+
+	k_min = giessen_stiffness()
+	k_max = 10*k_min
+	return (1/2)*((k_max + k_min)*square(omega*t) + (k_max - k_min))
+
 def var_stiffness(t,t0=0.5):
 	"""
 	A function where we can vary the stiffness of the trap
@@ -91,8 +98,7 @@ def langevinEuler(params, save_frequency=2):
 		step_number += 1
 	return save_times, positions, velocities, total_energies
 
-
-def trapSolver(params,save_frequency=2):
+def trapSolver(params,timestep,save_frequency=2):
 	"""
 	Returns the times, positions and velocities of
 	the nanosphere in the trap for a given set of 
@@ -121,7 +127,7 @@ def trapSolver(params,save_frequency=2):
 	x = 0 # initial position for time being
 	v = 0
 	t = 0
-	dt = 1e-3
+	dt = timestep # setting timestep from user param
 	step_number = 0
 	positions = []
 	velocities= []
@@ -170,7 +176,7 @@ def make_dir(dir_name):
 	"""
 	path = dir_name
 	try:
-		os.mkdir(path)
+		os.makedirs(path)
 	except FileExistsError:
 		print(f"Director {path} already exists")
 	except OSError:
