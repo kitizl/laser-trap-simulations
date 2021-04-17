@@ -42,6 +42,7 @@ def parse_arguments():
 	all_args.add_argument("-N","--numTrials", required=True,help="number of trials that need to be run")
 	all_args.add_argument("-r","--resolution",required=True,help="resolution for the histogram")
 	all_args.add_argument("-l","--label",required=False, help="label for the experiment")
+	all_args.add_argument("-d", "--timestep",required=False, help="time step in simulation")
 
 	args = vars(all_args.parse_args())
 
@@ -52,7 +53,8 @@ def parse_arguments():
 	Temperature : {args['temperature']} K \n\
 	Saving Frequency : {args['saving_freq']} steps per save\n\
 	Number of trials : {args['numTrials']} trials\n\
-	Resolution : {args['resolution']}\n")
+	Resolution : {args['resolution']}\n\
+	Timestep: {args['timestep']} s\n")
 	choice = input("Continue or abort? [y/n]")
 	if choice.upper() == 'Y':
 		# order is pressure, temperature, saving_freq, NUM_TRIALS, resolution
@@ -88,13 +90,13 @@ def physicalize(args):
 	Gamma = A*(0.619/(0.619+Kn))*B
 	Gamma2 = Gamma / (2*pi)
 
-	return [float(args['max_time']), m,Gamma2, kB*T, int(args['saving_freq']), int(args['numTrials']), int(args['resolution']),args['label']]
+	return [float(args['max_time']), m,Gamma2, kB*T, int(args['saving_freq']), int(args['numTrials']), int(args['resolution']),args['label'],float(args['timestep'])]
 
 if __name__ == "__main__":
 
 	import simulation
 	params = parse_arguments() # importing experimental parameters
-	max_time, mass, gamma, kBT, saving_freq, NUM_TRIALS, resolution, label = physicalize(params)
+	max_time, mass, gamma, kBT, saving_freq, NUM_TRIALS, resolution, label, timestep = physicalize(params)
 
 	# directory format is YYYYMMDD_HHMM
 
@@ -105,6 +107,10 @@ if __name__ == "__main__":
 	timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M")
 	DATA_DIR = "data"
 	PLOT_DIR = "plot"
+
+
+	if timestep is None:
+		timestep = 1e-3
 
 	if label is None:
 		# if a label is not provided, then use default naming conventions
@@ -123,9 +129,9 @@ if __name__ == "__main__":
 	# doing this multiple times so as to generate an average
 	for trial_num in range(NUM_TRIALS):
 		print(f"\r{trial_num}/{NUM_TRIALS}",end="")
-		ts,xs,vs,es = simulation.trapSolver([simulation.var_stiffness,mass,max_time, gamma, kBT], saving_freq)
+		ts,xs,vs,ks,ps = simulation.trapSolver([simulation.var_stiffness,mass,max_time, gamma, kBT], timestep, saving_freq)
 		# save this data
-		simulation.save_data([ts,xs,vs,es],DIR_NAME=DATA_DIR,file_index=trial_num)
+		simulation.save_data([ts,xs,vs,ks,ps],DIR_NAME=DATA_DIR,file_index=trial_num)
 	
 	print("\nSimulations are complete")
 
