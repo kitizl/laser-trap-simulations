@@ -23,6 +23,8 @@ def fourier_spectrum(X, sample_freq=1e-3):
 	"""
 	Returns the power spectrum (in arbitary units) for a given
 	signal X and a sampling frequency sample_freq
+		X : the position array of a nanosphere
+		sample_freq : Sampling frequency (this is generally dt*saving_freq)
 	"""
 	# find FFT of signal and its amplitude
 	ps = np.abs(np.fft.fft(X))**2 
@@ -34,8 +36,10 @@ def fourier_spectrum(X, sample_freq=1e-3):
 
 def signaltonoise(fs, ps, f_d):
 	"""
-	Returns the signal to noise ratio in dB for a given range of frequencies
-	fs for a powerspectrum ps, specifically for a given frequency
+	Returns the signal to noise ratio in dB
+		fs : the list of frequencies that make up the spectrum
+		ps : power spectrum of the system
+		f_d : the specific frequency for which the SNR is desired
 	"""
 
 	# find the index of the specified frequency
@@ -161,6 +165,11 @@ def histogram_movie(data_loc, resolution, plot_loc):
 def velocity_distribution(mass, kBT, data_loc, resolution, plot_loc):
 	"""
 		A function that shows the distribution of velocities and superimposes the predicted Maxwell-Boltzmann distribution
+			mass : mass of the nanosphere
+			kBT : value of boltzmann's constant times temperature that dictates the shape of the M-B distribution
+			data_loc : directory where the simulated data is located
+			resolution : number of bins in the histogram plot
+			plot_loc : directory where the plots will be saved
 	"""
 
 	file_list = glob.glob(f"{data_loc}/experiment*")
@@ -180,26 +189,30 @@ def velocity_distribution(mass, kBT, data_loc, resolution, plot_loc):
 	fig.set_figwidth(9)
 
 	# drawing the expected maxwell-boltzmann distribution
-	vs = np.linspace(-0.1,0.1,100)
+	vs = np.linspace(-1,1,100)
 	maxwell = np.exp(-0.5*mass*(vs**2)/(kBT))
 	maxwell *= mass/np.sqrt(2*np.pi*mass*kBT)
 	ax.plot(vs,maxwell,label="Normalized M-E Velocity Distribution")
 	
 	# drawing the observed distribution
-	ax.hist(vel_data, resolution,density=True,stacked=True, label="Normalized Histogram of Simulated Velocities")
+	ax.hist(vel_data, resolution*5,density=True,stacked=True, label="Normalized Histogram of Simulated Velocities")
 	# density and stacked need to be set to true for the heights to be normalized
 	
+
+	# setting limits
+	ax.set_xlim(-0.2,0.2)
 	ax.set_title("Velocity distribution",fontsize=20)
 	ax.set_xlabel("Velocities [m/s]",fontsize=18)
 	ax.legend(loc='upper right')
 	plt.savefig(f"{plot_loc}/vel-distribution.png",bbox_inches='tight')
 	plt.show()
 
-
 def energy_evolution(data_loc, plot_loc):
 	"""
 		A function that shows the evolution of the total
 		energy of the system to see if something has gone wrong.
+			data_loc : directory where the simulated data is located
+			plot_loc : directory where the plots needs to be saved 
 	"""
 	file_list = glob.glob(f"{data_loc}/experiment*")
 	# importing all of the data from the experiments
@@ -239,6 +252,8 @@ def energy_evolution(data_loc, plot_loc):
 def energy_variance(data_loc, plot_loc):
 	"""
 		A function that returns a plot of how much the total energy varies with time
+			data_loc : directory where the simulated data is located
+			plot_loc : directory where the plots needs to be saved
 	"""
 	file_list = glob.glob(f"{data_loc}/experiment*")
 	# importing all of the data from the experiments
@@ -270,6 +285,13 @@ def energy_variance(data_loc, plot_loc):
 	plt.show()
 
 def signal_variance(data_loc, plot_loc):
+	"""
+		A function that returns a plot of the ensemble variance and average
+		of the positions of the particle.
+			data_loc : directory where the simulated data is located
+			plot_loc : directory where the plots needs to be saved
+	"""
+
 	file_list = glob.glob(f"{data_loc}/experiment*")
 	# importing all of the data from the experiments
 	print("Importing data...")
@@ -282,9 +304,12 @@ def signal_variance(data_loc, plot_loc):
 	pos_average = np.array([np.mean(pos_data.T[i]) for i in range(len(ts))])
 	pos_variance = np.array([np.std(pos_data.T[i]) for i in range(len(ts))])
 
+	# printing the mean and standard deviation overall to see if these
+	# values make sense
 	print(f"Mean of x = {np.mean(pos_data)}m")
 	print(f"Stdev of x = {np.std(pos_data)}m")
 
+	# making a figure to draw plots in and control its properties
 	fig, ax = plt.subplots(1)
 	fig.set_figheight(8)
 	fig.set_figwidth(12)
