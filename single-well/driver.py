@@ -9,20 +9,8 @@ import sys
 import datetime
 import matplotlib.pyplot as plt
 from math import pi, sqrt
+from helper import make_dir
 
-def make_dir(dir_name):
-	"""
-	A function that creates a directory dir_name, if it doesn't exist.
-	"""
-	path = dir_name
-	try:
-		os.makedirs(path)
-	except FileExistsError:
-		print(f"Directory {path} already exists")
-	except OSError:
-		print (f"Creation of the directory %s failed" % path)
-	else:
-		print ("Successfully created the directory %s " % path)
 
 def parse_arguments():
 	# a helper function that parses the arguments passed
@@ -155,8 +143,6 @@ if __name__ == "__main__":
 	print("Producing energy evolution plots")
 	statistics.energy_evolution(DATA_DIR,PLOT_DIR)
 	
-	print("Producing signal profile")
-	statistics.signal_variance(DATA_DIR, PLOT_DIR)
 	# once this is done, you should have a folder of plot data and a movie
 	print("Analysis complete!")
 

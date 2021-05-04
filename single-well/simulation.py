@@ -2,6 +2,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import time
+from helper import make_dir
 
 # here we are going to simulate a single well oscillator
 
@@ -61,6 +62,8 @@ def var_stiffness(t,t0=0.5):
 
 def langevinEuler(params, save_frequency=2):
 	"""
+	DO NOT USE THIS FUNCTION : Use trapSolver() INSTEAD!
+
 	Uses Euler-Maruyama scheme to integrate
 	Returns the times, positions and velocities of
 	the nanosphere in the trap for a given set of 
@@ -170,26 +173,12 @@ def trapSolver(params,timestep,save_frequency=2):
 		step_number += 1
 	return save_times, positions, velocities, kinetic_energy, potential_energy
 
-def make_dir(dir_name):
-	"""
-	A function that creates a directory dir_name, if it doesn't exist.
-	"""
-	path = dir_name
-	try:
-		os.makedirs(path)
-	except FileExistsError:
-		print(f"Director {path} already exists")
-	except OSError:
-		print (f"Creation of the directory %s failed" % path)
-	else:
-		print ("Successfully created the directory %s " % path)
-
 def save_data(data_series, DIR_NAME="data", file_index=0):
 	"""
 	Saves data in a .npy format for quick saving and loading
+		data_series : the dataset that needs to be saved
+		DIR_NAME : the directory where the data needs to be saved
+		file_index : an index to label individual runs
 	"""
-	# create a directory if it doesn't exist
+	# saves each trial run in the specific directory
 	np.save(f"{DIR_NAME}/experiment-{file_index}.npy",np.vstack(data_series))
-
-# stiffness, max time, gamma, kBT
-

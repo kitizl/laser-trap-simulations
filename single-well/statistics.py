@@ -4,20 +4,7 @@ import numpy as np
 import glob
 import matplotlib.pyplot as plt
 import os
-
-def make_dir(dir_name):
-	"""
-	A function that creates a directory dir_name, if it doesn't exist.
-	"""
-	path = dir_name
-	try:
-		os.mkdir(path)
-	except FileExistsError:
-		print(f"Director {path} already exists")
-	except OSError:
-		print (f"Creation of the directory %s failed" % path)
-	else:
-		print ("Successfully created the directory %s " % path)
+from helper import make_dir
 
 def fourier_spectrum(X, sample_freq=1e-3):
 	"""
