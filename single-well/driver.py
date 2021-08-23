@@ -10,7 +10,7 @@ import datetime
 import matplotlib.pyplot as plt
 from math import pi, sqrt
 from helper import make_dir
-
+import time
 
 def parse_arguments():
 	# a helper function that parses the arguments passed
@@ -81,6 +81,7 @@ def physicalize(args):
 	return [float(args['max_time']), m,Gamma2, kB*T, int(args['saving_freq']), int(args['numTrials']), int(args['resolution']),args['label'],float(args['timestep'])]
 
 if __name__ == "__main__":
+	start_time = time.time()
 
 	import simulation
 	params = parse_arguments() # importing experimental parameters
@@ -165,6 +166,7 @@ if __name__ == "__main__":
 	Plots stored in : {PLOT_DIR}\n\
 	---\n\
 ## Additional Comments\n\
+	Time taken : {time.time() - start_time} seconds\n\
 	<add comments if you want>\n")
 		fhand.close()
 

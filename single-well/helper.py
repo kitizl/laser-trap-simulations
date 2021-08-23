@@ -1,5 +1,7 @@
 #!python3
 
+import os
+
 def make_dir(dir_name):
 	"""
 	A function that creates a directory at the path dir_name, if it doesn't exist.

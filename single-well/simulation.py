@@ -3,6 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import time
 from helper import make_dir
+from sys import exit
 
 # here we are going to simulate a single well oscillator
 
@@ -18,12 +19,24 @@ def potential(x, params, grad=False):
 	else: # if we need the potential directly
 		return (k*x**2)/2
 
+def electric_field_amplitude(power, waist):
+	"""
+		Returns electric field amplitude given the power of the laser
+		and the waist at the focus.
+
+		Since electric field amplitude is not directly accessible t
+	"""
+	permittivity = 8.8541878128e-12 # SI units, from CODATA
+	c = 299792458 # SI units, from CODATA
+	return (4*power)/(permittivity*c*np.pi*waist**2)
+
 def gieseler_stiffness():
 	"""
 		A physically realistic function that determines stiffness
 		of the trap at time t (constant for now) using constants
 		determined by Jan Gieseler in their PhD thesis.
 	"""
+	laser_power = 300e-3 # 300 mW is the power of the laser
 	waist = 687e-9 # meters
 	perm =  8.8541878128e-12 # farad/meter
 	wave = 2*np.pi/(1064e-9) # wavenumber of the laser
@@ -35,8 +48,8 @@ def gieseler_stiffness():
 	ep = 11.9*perm #:shrug:
 	alpha = 3*V*perm*(ep-em)/(ep+2*em) # Clausius-Mossotti relation
 	pol_eff = alpha/(1 + (((wave**3)/(6*np.pi*perm))**2) * (alpha**2)) # calculating (real) effective polarizability
-	E_0 = 2e3 # placeholder, I have no idea what the intensity of the laser is
-	k = pol_eff*E_0**2/waist**2 # calculating stiffness from polarizability, laser intensity and waist width
+
+	k = pol_eff*electric_field_amplitude(laser_power,waist)/waist**2 # calculating stiffness from polarizability, laser intensity and waist width
 	return k
 
 def square_stiffness(t, omega):
@@ -171,6 +184,11 @@ def trapSolver(params,timestep,save_frequency=2):
 			save_times.append(t)
 		t = t+dt
 		step_number += 1
+
+		if np.abs(x) > 1e100:
+			print(x)
+			print("Nanosphere lost.")
+			exit(-1) # exiting now.
 	return save_times, positions, velocities, kinetic_energy, potential_energy
 
 def save_data(data_series, DIR_NAME="data", file_index=0):
@@ -182,3 +200,4 @@ def save_data(data_series, DIR_NAME="data", file_index=0):
 	"""
 	# saves each trial run in the specific directory
 	np.save(f"{DIR_NAME}/experiment-{file_index}.npy",np.vstack(data_series))
+
