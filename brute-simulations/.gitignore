@@ -2,3 +2,10 @@
 
 *.csv
 *.png
+*.npy
+
+*.pyc
+
+.vscode
+*.zip
+*.psdata
