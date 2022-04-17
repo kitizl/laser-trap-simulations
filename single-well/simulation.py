@@ -186,6 +186,7 @@ def trapSolver(params,timestep,save_frequency=2):
 		step_number += 1
 
 		if np.abs(x) > 1e100:
+			# if the "distance" of the particle is too large
 			print(x)
 			print("Nanosphere lost.")
 			exit(-1) # exiting now.
@@ -201,3 +202,81 @@ def save_data(data_series, DIR_NAME="data", file_index=0):
 	# saves each trial run in the specific directory
 	np.save(f"{DIR_NAME}/experiment-{file_index}.npy",np.vstack(data_series))
 
+def duffingSolver(params,timestep,save_frequency=2):
+	"""
+	Returns the times, positions and velocities of
+	the nanosphere in the trap for a given set of 
+	parameters (damping and so on) and a rate of saving data,
+	modelling the system as a stochastic Duffing Oscillator
+
+	params : stiffness, max_time, damping constant gamma, k_B T
+	save_frequency : number of steps between saving data
+	"""
+
+	def update_x(x,v,dt):
+		# 'macro' to update position
+		return x + v*dt/2
+	def update_v(v,F,dt):
+		# 'macro' to update velocity
+		return v+F*dt/2
+
+	def random_update(v,gamma,mass,kBT, dt):
+		# 'macro' to update velocity with the random noise
+		R = np.random.normal()
+		damping = np.exp(-gamma*dt) # through solving stochastic eq.
+		random_kick = np.sqrt(1-damping*damping)*np.sqrt(kBT/mass)
+		return damping*v + R*random_kick
+
+	stiffness, mass, max_time, gamma, kBT = params # setting parameters
+	# all initial conditions set to 0
+	x = 0 # initial position for time being
+	v = 0
+	t = 0
+	dt = timestep # setting timestep from user param
+	step_number = 0
+	positions = []
+	velocities= []
+	kinetic_energy = []
+	potential_energy = []
+	save_times = []
+
+	while(t<max_time):
+		# B
+
+		v = update_v(v,-potential(x,stiffness(t),True)/mass,dt)
+
+		# A
+
+		x = update_x(x,v,dt)
+
+		# O
+
+		v = random_update(v,gamma,mass,kBT,dt)
+
+		# A
+
+		x = update_x(x,v,dt)
+
+		# B
+
+		v = update_v(v,-potential(x,stiffness(t),True)/mass,dt)
+
+		v = update_v(v,0,dt)
+		if abs(step_number%save_frequency) <1e-6 and step_number>0:
+			kin = 0.5*mass*v*v # calculating kinetic energy
+			pot = potential(x,stiffness(t)) # calculating potential energy
+
+			positions.append(x)
+			velocities.append(v)
+			kinetic_energy.append(kin)
+			potential_energy.append(pot)
+			save_times.append(t)
+		t = t+dt
+		step_number += 1
+
+		if np.abs(x) > 1e100:
+			# if the "distance" of the particle is too large
+			print(x)
+			print("Nanosphere lost.")
+			exit(-1) # exiting now.
+	return save_times, positions, velocities, kinetic_energy, potential_energy
