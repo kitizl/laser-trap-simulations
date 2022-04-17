@@ -9,3 +9,7 @@
 .vscode
 *.zip
 *.psdata
+
+.ipynb_checkpoints
+
+experimental-lfc
