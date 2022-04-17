@@ -1,0 +1,4 @@
+# all csv files get cancelled
+
+*.csv
+*.png
