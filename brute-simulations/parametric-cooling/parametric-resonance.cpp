@@ -24,9 +24,9 @@ float pToGamma(float pressure, float kBT, float a, float rho, float m){
 	float B = (1+ck);
 
 	// damping rate
-	float Gamma = A*(0.619/(0.619+Kn))*B;
-	float Gamma2 = Gamma / (2*pi);
-	return Gamma2;
+	float Gamma = A*(0.619/(0.619+Kn))*B; // angular damping rate
+	// float Gamma2 = Gamma / (2*pi); // dimensionally-equal to "f"
+	return Gamma;
 }
 
 int main(int argc, char *argv[]){
@@ -87,8 +87,8 @@ int main(int argc, char *argv[]){
 
 	// getting modulation depth
 
-	float mod_depth = std::stof(argv[6])
-	float param_phase_shift = std::stof(argv[7])
+	float mod_depth = std::stof(argv[6]);
+	float param_phase_shift = std::stof(argv[7]);
 
     myfile << t << "," << x << "," << v << std::endl;
     for(int i = 1; i < Nsteps-1; i++){
@@ -101,7 +101,7 @@ int main(int argc, char *argv[]){
         a = -omega*omega*(1 + mod_depth*std::cos(2*omega*t + param_phase_shift))*x - gamma*v + noise_force;
         v = v + 0.5*dt*a;
 
-        if (std::abs(x) > 1.0){
+        if (std::abs(x) > 10.0){
             std::cout << "Particle lost" << std::endl;
             break;
         }
