@@ -1,5 +1,8 @@
+#include <stdio.h>
 #include <iostream>
 
+#include <numeric> // to get std::iota from
+#include <vector>
 #include <cmath>
 #include <random>
 
@@ -24,9 +27,9 @@ float pToGamma(float pressure, float kBT, float a, float rho, float m){
 	float B = (1+ck);
 
 	// damping rate
-	float Gamma = A*(0.619/(0.619+Kn))*B; // angular damping rate
-	// float Gamma2 = Gamma / (2*pi); // dimensionally-equal to "f"
-	return Gamma;
+	float Gamma = A*(0.619/(0.619+Kn))*B;
+	float Gamma2 = Gamma / (2*pi);
+	return Gamma2;
 }
 
 int main(int argc, char *argv[]){
@@ -43,8 +46,8 @@ int main(int argc, char *argv[]){
         3. Pressure in mbar
         4. Frequency (f)
         5. Number of steps before saving (stick to 1.)
-		6. Modulation Depth (Epsilon)
-		7. Modulation Phase Shift (Phi)
+		6. Modulation depth eta (0 - 1.0)
+		7. Phase shift (0 to 2pi)
     */
     for (int i = 0 ; i < argc ; i++) {
         std::cout << i << "\t" << argv[i] << std::endl;
@@ -65,7 +68,8 @@ int main(int argc, char *argv[]){
     float omega = 2*PI*std::stof(argv[4]); // getting natural frequency of particle
     
     int steps_per_save = std::stoi(argv[5]); // number of steps per save
-
+	float mod_depth = std::stof(argv[6]); // modulation depth
+	float phase_shift = std::stof(argv[7]); // phase shift
     std::ofstream myfile;
 	myfile.open(filename); // create a file here
 	myfile << "t,x,v" << std::endl;
@@ -84,23 +88,19 @@ int main(int argc, char *argv[]){
   	std::normal_distribution<double> R(0.0,1.0);
 
     float noise_force = 0.0;
-
-	// getting modulation depth
-
-	float mod_depth = std::stof(argv[6]);
-	float param_phase_shift = std::stof(argv[7]);
-    std::cout<<mod_depth << std::endl;
+	float mod_signal = 0.0;
     myfile << t << "," << x << "," << v << std::endl;
     for(int i = 1; i < Nsteps-1; i++){
         noise_force = R(generator)*std::sqrt(2*kBT*gamma/(mass));
-        a = -omega*omega*(1 + mod_depth*std::cos(2*omega*t + param_phase_shift))*x - gamma*v + noise_force;
+		mod_signal = 1 + mod_depth*std::cos(2*omega*t + phase_shift);
+        a = -omega*omega*mod_signal*x - gamma*v + noise_force;
     
         v = v + 0.5*dt*a;
         x = x + dt*v;
-        a = -omega*omega*(1.0 + mod_depth*std::cos(2*omega*t + param_phase_shift))*x - gamma*v + noise_force;
+        a = -omega*omega*mod_signal*x - gamma*v + noise_force;
         v = v + 0.5*dt*a;
 
-        if (std::abs(x) > 10.0){
+        if (std::abs(x) > 1.0){
             std::cout << "Particle lost" << std::endl;
             break;
         }

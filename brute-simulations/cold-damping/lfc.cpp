@@ -78,8 +78,8 @@ int main(int argc, char *argv[]){
 	myfile << "t,x,v" << std::endl;
     
     float max_time = 1.0; // 1 second
-    double dt = 1e-6; // 1 nanosecond sampling time
-    long Nsteps = 1e6; // one billion samples
+    double dt = 1e-6; // 1 microsecond sampling time
+    long Nsteps = 1e6; // one million samples
 
     // initializing the position and velocity vectors
     float x = 100e-9;
@@ -88,13 +88,15 @@ int main(int argc, char *argv[]){
     double t = 0;
 
     std::default_random_engine generator;
-  	std::normal_distribution<double> R(0.0,1.0);
+    double mean_force = 0.0; // average force has to be 0
+    double std_force = std::sqrt(2*kBT*gamma/(dt*mass)); // standard deviation is propto the size of the autocorrelation function
+  	std::normal_distribution<double> R(mean_force,std_force);
 
     float electric_force = q*E/mass; // initializing the force
     float noise_force = 0.0;
 
     for(int i = 1; i < Nsteps-1; i++){
-        noise_force = R(generator)*std::sqrt(2*kBT*gamma/(dt*mass));
+        noise_force = R(generator);
         electric_force = q*E*v/mass;
 
         a = -omega*omega*x - gamma*v + noise_force + electric_force;

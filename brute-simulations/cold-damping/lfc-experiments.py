@@ -35,16 +35,16 @@ def data_stats(df, title, filename, N=100):
 
 	return (average_pos*1e9, pos_var*1e9)
 
-
+"""
 # First running the control
 
-compile_proc = subprocess.Popen(["wsl", "g++", "control.cpp", "-o", "control"])
+compile_proc = subprocess.Popen(["wsl", "g++", "../control/control.cpp", "-o", "../control/control"])
 compile_proc.wait()
 
 for p in pressures:
-	filename = f"pressure-lfc/control_{p}mbar.csv"
+	filename = f"pressure-lfc-2/control_{p}mbar.csv"
 	print(f"Simulating {p} mbar dataset...")
-	proc = subprocess.Popen(["wsl","./control", filename, '71.5e-9', f'{p}', '150e3', '1'])
+	proc = subprocess.Popen(["wsl","../control/control", filename, '71.5e-9', f'{p}', '150e3', '1'])
 	proc.wait()
 
 ## Performing the analysis
@@ -55,7 +55,7 @@ control_var = []
 
 for p in pressures:
 	print(f"Analysing {p} mbar dataset...")
-	filename = f"pressure-lfc/control_{p}mbar.csv"
+	filename = f"pressure-lfc-2/control_{p}mbar.csv"
 	data = pd.read_csv(filename)
 	mean, var = data_stats(data, f"Control : {p} mbar dataset", filename=filename)
 	control_means += [mean]
@@ -72,18 +72,18 @@ compile_proc = subprocess.Popen(["wsl", "g++", "lfc.cpp", "-o", "lfc"])
 compile_proc.wait()
 
 for p in pressures:
-	filename = f"pressure-lfc/lfc_{p}mbar.csv"
+	filename = f"pressure-lfc-2/lfc_{p}mbar.csv"
 	print(f"Simulating {p} mbar dataset...")
 	proc = subprocess.Popen(["wsl","./lfc", filename, '-7', '1000', '71.5e-9', f'{p}', '150e3', '1'])
 	proc.wait()
-
+"""
 lfc_df = pd.DataFrame()
 lfc_means = []
 lfc_var = []
 
 for p in pressures:
 	print(f"Analysing {p} mbar dataset...")
-	filename = f"pressure-lfc/lfc_{p}mbar.csv"
+	filename = f"pressure-lfc-2/lfc_{p}mbar.csv"
 	data = pd.read_csv(filename)
 	mean, var = data_stats(data, f"LFC : {p} mbar dataset", filename=filename)
 	lfc_means += [mean]

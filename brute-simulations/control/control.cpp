@@ -82,12 +82,14 @@ int main(int argc, char *argv[]){
     double t = 0;
 
     std::default_random_engine generator;
-  	std::normal_distribution<double> R(0.0,1.0);
+    double mean_force = 0.0; // average force has to be 0
+    double std_force = std::sqrt(2*kBT*gamma/(dt*mass)); // standard deviation is propto the size of the autocorrelation function
+  	std::normal_distribution<double> R(mean_force,std_force);
 
     float noise_force = 0.0;
     myfile << t << "," << x << "," << v << std::endl;
     for(int i = 1; i < Nsteps-1; i++){
-        noise_force = R(generator)*std::sqrt(2*kBT*gamma/(mass));
+        noise_force = R(generator);
 
         a = -omega*omega*x - gamma*v + noise_force;
     

@@ -2,6 +2,7 @@
 
 *.csv
 *.png
+*.txt
 *.npy
 
 *.pyc
@@ -13,3 +14,4 @@
 .ipynb_checkpoints
 
 experimental-lfc
+
